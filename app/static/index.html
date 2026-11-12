@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full bg-[#fbf9f6]">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Кулинариум — Гастрономическая коллекция рецептов</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%2232%22><text y=%2224%22 font-size=%2224%22>🍽️</text></svg>">
+  
+  <!-- Premium Typography: Plus Jakarta Sans & Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="min-h-full flex flex-col font-sans text-stone-800 antialiased selection:bg-brand-600 selection:text-white bg-[#fbf9f6]">
+
+  <!-- Main Navigation Header -->
+  <header class="sticky top-0 z-30 bg-[#fbf9f6]/90 backdrop-blur-md border-b border-stone-200/80 transition-all">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-sm shadow-brand-600/20 group-hover:scale-105 transition-transform">
+          <i data-lucide="utensils" class="w-4 h-4"></i>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-serif text-2xl font-bold tracking-tight text-stone-900 group-hover:text-brand-600 transition-colors">Кулинариум</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-brand-600 mb-0.5"></span>
+        </div>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="flex-1 max-w-md mx-auto hidden sm:block">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Поиск по названию блюда, ингредиентам или категории..." 
+            class="w-full pl-10 pr-9 py-2 text-xs bg-white border border-stone-200/90 rounded-full focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all placeholder:text-stone-400 text-stone-800 shadow-sm"
+          />
+          <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-3">
+        
+        <!-- Favorites Tab -->
+        <button 
+          id="favoritesTabBtn" 
+          class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-full transition-colors"
+          title="Мои избранные рецепты"
+        >
+          <i data-lucide="bookmark" class="w-4 h-4 text-brand-600"></i>
+          <span class="hidden md:inline font-semibold">Избранное</span>
+          <span id="favCountBadge" class="hidden text-[10px] bg-brand-600 text-white px-1.5 py-0.2 rounded-full font-bold">0</span>
+        </button>
+
+        <!-- Add Recipe Button (For all registered users) -->
+        <button 
+          id="openCreateModalBtn"
+          class="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-full text-xs font-semibold shadow-sm shadow-brand-600/30 hover:shadow-md transition-all active:scale-95"
+        >
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>Добавить рецепт</span>
+        </button>
+
+        <!-- Auth Section -->
+        <div id="authSection" class="flex items-center gap-2">
+          <button 
+            id="loginBtn" 
+            class="px-4 py-2 text-xs font-semibold text-stone-800 border border-stone-300 hover:border-brand-600 hover:text-brand-600 rounded-full transition-colors"
+          >
+            Войти
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Mobile Search -->
+    <div class="sm:hidden px-6 pb-3 pt-1">
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
+        <input 
+          type="text" 
+          id="searchInputMobile" 
+          placeholder="Поиск по названию блюда, ингредиентам или категории..." 
+          class="w-full pl-10 pr-9 py-2 text-xs bg-white border border-stone-200 rounded-full outline-none"
+        />
+      </div>
+    </div>
+  </header>
+
+  <!-- Editorial Hero Section with Subtle Warm Ambient Light -->
+  <section class="relative pt-12 pb-8 max-w-6xl mx-auto px-6 lg:px-8 w-full">
+    
+    <!-- Warm background glow -->
+    <div class="absolute -top-10 left-1/3 w-96 h-96 bg-brand-100/40 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+    <div class="max-w-2xl mb-10">
+      <span class="text-xs uppercase tracking-widest font-bold text-brand-600 mb-2 block">Кулинарная коллекция</span>
+      <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl font-semibold text-stone-900 tracking-tight leading-tight mb-4">
+        Блюда, приготовленные с заботой и вдохновением
+      </h1>
+      <p class="text-stone-600 text-sm sm:text-base leading-relaxed font-light">
+        Пошаговые способы приготовления, точные пропорции ингредиентов и избранные рецепты для каждого дня.
+      </p>
+    </div>
+
+    <!-- Category & Subcategory Navigation -->
+    <div class="space-y-4 border-b border-stone-200/90 pb-5">
+      
+      <!-- Subcategory Tabs (Warm Pill Design) -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none" id="subcategoriesContainer">
+        <!-- Dynamically populated clean pills -->
+      </div>
+
+      <!-- Categories Filter Row -->
+      <div class="flex items-center justify-between text-xs text-stone-500 pt-1 flex-wrap gap-3">
+        <div class="flex items-center gap-2 flex-wrap" id="mainCategoriesContainer">
+          <span class="text-stone-400 font-medium">Категория:</span>
+          <!-- Dynamic Category Chips -->
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="viewAllBtn" class="filter-tab active font-semibold text-brand-700 border-b-2 border-brand-600 pb-1">Все рецепты</button>
+          <span class="text-stone-300">/</span>
+          <button id="viewFavBtn" class="filter-tab text-stone-500 hover:text-brand-700 pb-1">Только избранное</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Main Recipes Container -->
+  <main class="flex-1 max-w-6xl mx-auto px-6 lg:px-8 pb-20 w-full">
+    
+    <!-- Results Header -->
+    <div class="flex items-center justify-between py-4 mb-6 text-xs text-stone-500 font-medium">
+      <div id="recipeCount" class="font-medium text-stone-600">Загрузка рецептов...</div>
+      <div id="activeFiltersDisplay" class="flex items-center gap-2"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-20 px-4 bg-white rounded-3xl border border-stone-200/80 shadow-sm max-w-md mx-auto">
+      <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="book-open" class="w-6 h-6"></i>
+      </div>
+      <h3 class="font-serif text-xl font-semibold text-stone-900 mb-2">Рецепты не найдены</h3>
+      <p class="text-stone-500 text-xs mb-6 font-light leading-relaxed">Попробуйте изменить поисковый запрос или выберите другую категорию блюд.</p>
+      <button id="resetFiltersBtn" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold rounded-full transition-colors border border-brand-200/60">
+        Сбросить все фильтры
+      </button>
+    </div>
+
+    <!-- Recipes Grid -->
+    <div id="recipesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Recipe cards injected here -->
+    </div>
+
+  </main>
+
+  <!-- Recipe Detail View Modal -->
+  <div id="recipeDetailModal" class="fixed inset-0 z-50 hidden bg-stone-950/65 backdrop-blur-sm overflow-y-auto p-4 sm:p-8 flex items-center justify-center">
+    <div class="relative bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
+      
+      <!-- Modal Header Hero Image -->
+      <div class="relative h-72 sm:h-80 w-full bg-stone-100 overflow-hidden flex-shrink-0">
+        <img id="detailImage" src="" alt="Recipe Image" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/25 to-transparent"></div>
+        
+        <!-- Close button -->
+        <button id="closeDetailModalBtn" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-stone-700 hover:text-stone-900 flex items-center justify-center shadow-md transition-all">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Favourite button inside modal -->
+        <button id="detailFavBtn" class="absolute top-5 left-5 px-3.5 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-800 flex items-center gap-1.5 text-xs font-semibold shadow-md transition-all">
+          <i data-lucide="bookmark" class="w-3.5 h-3.5 text-brand-600"></i>
+          <span id="detailFavText">В избранное</span>
+        </button>
+
+        <!-- Title & Tags Overlay -->
+        <div class="absolute bottom-6 left-6 right-6 text-white">
+          <div class="flex items-center gap-2 mb-2.5 flex-wrap">
+            <span id="detailCategory" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wider uppercase bg-brand-600 text-white shadow-sm"></span>
+            <span id="detailSubcategory" class="px-2.5 py-0.5 rounded-full text-[11px] font-medium tracking-wide uppercase bg-black/40 backdrop-blur-md text-stone-200 border border-white/20"></span>
+          </div>
+          <h2 id="detailTitle" class="font-serif text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight tracking-tight"></h2>
+        </div>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 sm:p-8 overflow-y-auto flex-1 space-y-8">
+        
+        <!-- Description -->
+        <p id="detailDescription" class="text-stone-600 text-sm leading-relaxed font-light"></p>
+
+        <!-- Kitchen Timer -->
+        <div class="bg-gradient-to-r from-brand-50/70 to-amber-50/70 border border-brand-200/60 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-sm shadow-brand-600/20">
+              <i data-lucide="clock" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-bold tracking-widest uppercase text-brand-800">Таймер приготовления</div>
+              <div id="timerDisplay" class="font-mono text-xl font-bold text-stone-900">00:00</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button class="timer-preset-btn" data-seconds="60">+1 мин</button>
+            <button class="timer-preset-btn" data-seconds="300">+5 мин</button>
+            <button class="timer-preset-btn" data-seconds="600">+10 мин</button>
+            <button id="timerToggleBtn" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold shadow-sm shadow-brand-600/20 transition-colors">Старт</button>
+            <button id="timerResetBtn" class="px-3 py-1.5 bg-white hover:bg-stone-100 text-stone-700 rounded-lg text-xs font-medium border border-stone-200 transition-colors">Сброс</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+          
+          <!-- Ingredients Column -->
+          <div class="md:col-span-2">
+            <h3 class="font-serif text-lg font-semibold text-stone-900 mb-1 flex items-center justify-between">
+              <span>Ингредиенты</span>
+              <span id="ingredientsCount" class="text-xs font-sans text-brand-700 font-semibold">0</span>
+            </h3>
+            <p class="text-[11px] text-stone-400 mb-3">Отмечайте подготовленные продукты:</p>
+            <ul id="detailIngredientsList" class="space-y-2">
+              <!-- Injected by JS -->
+            </ul>
+          </div>
+
+          <!-- Preparation Steps Column -->
+          <div class="md:col-span-3">
+            <h3 class="font-serif text-lg font-semibold text-stone-900 mb-1 flex items-center justify-between">
+              <span>Способ приготовления</span>
+              <span id="stepsCount" class="text-xs font-sans text-brand-700 font-semibold">0 шагов</span>
+            </h3>
+            <p class="text-[11px] text-stone-400 mb-3">Следуйте шагам по порядку:</p>
+            <ol id="detailStepsList" class="space-y-3.5">
+              <!-- Injected by JS -->
+            </ol>
+          </div>
+
+        </div>
+
+        <!-- Comments and Rating Section -->
+        <div class="pt-8 border-t border-stone-200 space-y-6">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h3 class="font-serif text-xl font-semibold text-stone-900 flex items-center gap-2">
+                <span>Отзывы и оценка</span>
+                <span id="detailCommentsCountBadge" class="text-xs font-sans font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-full border border-brand-200/60">0</span>
+              </h3>
+              <p class="text-xs text-stone-500 font-light mt-0.5">Впечатления и оценки от кулинаров</p>
+            </div>
+            <div id="detailAverageRatingBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs font-bold shadow-sm">
+              <span id="detailAvgRatingStars" class="flex items-center"></span>
+              <span id="detailAvgRatingNumber" class="font-bold text-sm">0.0</span>
+            </div>
+          </div>
+
+          <!-- Add Comment & Rating Form Box -->
+          <div id="addCommentContainer" class="p-5 rounded-2xl bg-stone-50 border border-stone-200/80">
+            <!-- Dynamic: form if authenticated, login prompt if guest -->
+          </div>
+
+          <!-- Comments List Container -->
+          <div class="space-y-3">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-stone-500">Все отзывы</h4>
+            <div id="detailCommentsList" class="space-y-3">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-8 py-4 bg-stone-50 border-t border-stone-200 flex items-center justify-between text-xs text-stone-400">
+        <div class="flex items-center gap-3">
+          <span id="detailCreatedAt"></span>
+          <span id="detailAuthorBadge" class="hidden text-stone-600 font-medium"></span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="deleteRecipeBtn" class="hidden text-rose-600 hover:text-rose-700 font-medium px-3 py-1.5 rounded-lg hover:bg-rose-50 transition-colors">
+            Удалить рецепт
+          </button>
+          <button id="closeDetailModalFooterBtn" class="px-5 py-2 bg-stone-200 hover:bg-stone-300 text-stone-800 font-medium rounded-full transition-colors">
+            Закрыть
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Create Recipe Modal (All Registered Users) -->
+  <div id="recipeCreateModal" class="fixed inset-0 z-50 hidden bg-stone-950/65 backdrop-blur-sm overflow-y-auto p-4 sm:p-6 flex items-center justify-center">
+    <div class="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="px-8 py-6 border-b border-stone-200 flex items-center justify-between">
+        <div>
+          <h2 class="font-serif text-2xl font-semibold text-stone-900">Новый рецепт</h2>
+          <p class="text-xs text-stone-500 font-light mt-0.5">Поделитесь своим любимым блюдом с сообществом</p>
+        </div>
+        <button id="closeCreateModalBtn" class="w-8 h-8 rounded-full hover:bg-stone-100 text-stone-500 hover:text-stone-800 flex items-center justify-center transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <form id="createRecipeForm" class="p-8 overflow-y-auto flex-1 space-y-6">
+        
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">Название блюда *</label>
+          <input 
+            type="text" 
+            id="formRecipeName" 
+            required 
+            placeholder="например: Французский луковый суп" 
+            class="w-full px-4 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <!-- Category -->
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">Основная категория *</label>
+            <div class="space-y-2">
+              <select 
+                id="formRecipeCategorySelect" 
+                class="w-full px-3.5 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-brand-500 outline-none"
+              >
+                <!-- Populated dynamically -->
+              </select>
+              <input 
+                type="text" 
+                id="formRecipeCategoryCustom" 
+                placeholder="Название новой категории..." 
+                class="hidden w-full px-3.5 py-2 text-sm bg-amber-50/50 border border-amber-300 rounded-xl outline-none focus:border-brand-500"
+              />
+            </div>
+          </div>
+
+          <!-- Subcategory -->
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">Подкатегория</label>
+            <div class="space-y-2">
+              <select 
+                id="formRecipeSubcatSelect" 
+                class="w-full px-3.5 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-brand-500 outline-none"
+              >
+                <!-- Populated dynamically -->
+              </select>
+              <input 
+                type="text" 
+                id="formRecipeSubcatCustom" 
+                placeholder="Своя подкатегория..." 
+                class="hidden w-full px-3.5 py-2 text-sm bg-amber-50/50 border border-amber-300 rounded-xl outline-none focus:border-brand-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo Upload Section -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700">Фотография блюда</label>
+            <span class="text-[11px] text-stone-400">Файл до 5 МБ (JPEG, PNG, WebP)</span>
+          </div>
+
+          <!-- Hidden storage input for recipe payload -->
+          <input type="hidden" id="formRecipeImage" value="" />
+
+          <!-- Interactive File Dropzone -->
+          <div 
+            id="imageDropzone" 
+            class="relative border-2 border-dashed border-stone-200 hover:border-brand-400 rounded-2xl p-5 text-center cursor-pointer bg-stone-50/50 hover:bg-brand-50/20 transition-all group"
+          >
+            <input 
+              type="file" 
+              id="recipeFileInput" 
+              accept="image/jpeg,image/png,image/webp,image/gif" 
+              class="hidden" 
+            />
+
+            <!-- Empty Dropzone State -->
+            <div id="dropzoneEmptyContent" class="space-y-2 py-2">
+              <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform shadow-sm">
+                <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+              </div>
+              <div class="text-xs font-semibold text-stone-800">
+                <span>Нажмите для выбора файла</span> или перетащите фото сюда
+              </div>
+              <p class="text-[11px] text-stone-400 font-light">
+                Сервер автоматически сохранит и оптимизирует изображение
+              </p>
+            </div>
+
+            <!-- Uploading Spinner State -->
+            <div id="dropzoneLoadingContent" class="hidden py-4 space-y-2 text-center">
+              <div class="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p class="text-xs font-medium text-brand-700">Загрузка и проверка безопасности файла...</p>
+            </div>
+
+            <!-- Uploaded Preview State -->
+            <div id="dropzonePreviewContent" class="hidden flex items-center gap-4 text-left p-1">
+              <img id="uploadPreviewImg" src="" alt="Preview" class="w-20 h-20 rounded-xl object-cover border border-stone-200 shadow-sm flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 text-emerald-600 text-xs font-semibold mb-0.5">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                  <span>Фото успешно загружено</span>
+                </div>
+                <div id="uploadPreviewFilename" class="text-xs font-medium text-stone-800 truncate"></div>
+                <div id="uploadPreviewSize" class="text-[11px] text-stone-400 font-light mt-0.5"></div>
+              </div>
+              <button 
+                type="button" 
+                id="removeUploadedFileBtn" 
+                class="px-3 py-1.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors font-medium"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+
+          <!-- Secondary option to paste an external link if needed -->
+          <div class="mt-2 text-right">
+            <button 
+              type="button" 
+              id="toggleExternalUrlBtn" 
+              class="text-[11px] text-stone-400 hover:text-brand-600 transition-colors"
+            >
+              или указать внешнюю ссылку
+            </button>
+            <div id="externalUrlBox" class="hidden mt-2">
+              <input 
+                type="url" 
+                id="formRecipeExternalUrl" 
+                placeholder="https://images.unsplash.com/..." 
+                class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-brand-500 outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">Описание блюда *</label>
+          <textarea 
+            id="formRecipeDescription" 
+            rows="3" 
+            required 
+            placeholder="Несколько предложений о вкусе, истории и подаче..." 
+            class="w-full px-4 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-brand-500 outline-none transition-all resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Ingredients Section -->
+        <div class="pt-4 border-t border-stone-200">
+          <div class="flex items-center justify-between mb-3">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700">Ингредиенты</label>
+            <button type="button" id="addIngredientRowBtn" class="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Добавить ингредиент
+            </button>
+          </div>
+          <div id="ingredientsRowsContainer" class="space-y-2.5">
+            <!-- Dynamic Rows -->
+          </div>
+        </div>
+
+        <!-- Steps Section -->
+        <div class="pt-4 border-t border-stone-200">
+          <div class="flex items-center justify-between mb-3">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700">Способ приготовления</label>
+            <button type="button" id="addStepRowBtn" class="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Добавить шаг
+            </button>
+          </div>
+          <div id="stepsRowsContainer" class="space-y-2.5">
+            <!-- Dynamic Rows -->
+          </div>
+        </div>
+
+        <div id="formErrorMessage" class="hidden text-xs text-rose-600 bg-rose-50 p-3 rounded-xl border border-rose-200"></div>
+
+        <!-- Submit Actions -->
+        <div class="pt-4 border-t border-stone-200 flex items-center justify-end gap-3">
+          <button type="button" id="cancelCreateModalBtn" class="px-5 py-2 text-xs font-medium text-stone-500 hover:text-stone-900 transition-colors">
+            Отмена
+          </button>
+          <button type="submit" id="submitRecipeBtn" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-full text-xs font-bold shadow-md shadow-brand-600/20 active:scale-95 transition-all">
+            Опубликовать рецепт
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden bg-stone-950/65 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-7 animate-in fade-in duration-200">
+      
+      <div class="flex items-center justify-between mb-5">
+        <h3 id="authModalTitle" class="font-serif text-xl font-semibold text-stone-900">Вход в аккаунт</h3>
+        <button id="closeAuthModalBtn" class="text-stone-400 hover:text-stone-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="flex bg-stone-100 p-1 rounded-xl mb-5 text-xs font-semibold">
+        <button id="authTabLogin" class="flex-1 py-1.5 rounded-lg bg-white text-stone-900 shadow-sm transition-all">Вход</button>
+        <button id="authTabRegister" class="flex-1 py-1.5 rounded-lg text-stone-500 hover:text-stone-900 transition-all">Регистрация</button>
+      </div>
+
+      <form id="authForm" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-medium text-stone-600 mb-1">Имя пользователя</label>
+          <input type="text" id="authUsername" required minlength="3" placeholder="Ваш логин" class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-brand-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-stone-600 mb-1">Пароль</label>
+          <input type="password" id="authPassword" required minlength="6" placeholder="••••••••" class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-brand-500 outline-none" />
+        </div>
+        
+        <div id="authErrorMsg" class="hidden text-xs text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200"></div>
+
+        <button type="submit" id="authSubmitBtn" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-full text-xs font-bold shadow-md shadow-brand-600/20 active:scale-95 transition-all mt-2">
+          Войти
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Application Script -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
